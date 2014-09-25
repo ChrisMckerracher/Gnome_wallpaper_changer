@@ -1,7 +1,7 @@
 Gnome_wallpaper_changer
 =======================
 
-Changes the wallpaper depending on the time of day
+Changes the wallpaper for gnome-shell depending on the time of day
 
 Installation:  
 1) chmod +x random_wallpaper  
