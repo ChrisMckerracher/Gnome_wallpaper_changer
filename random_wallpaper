@@ -1,0 +1,55 @@
+#!/bin/bash
+
+#array_day flat out doesn't work
+#####Env Variable Decloration
+
+#http://stackoverflow.com/questions/10374520/gsettings-with-cron used for cron integration
+PID=$(pgrep gnome-session)
+export DBUS_SESSION_BUS_ADDRESS=$(grep -z DBUS_SESSION_BUS_ADDRESS /proc/$PID/environ|cut -d= -f2-)
+
+#####Func Declaration
+
+array_day () {
+    #element one is an array, element 2 is an int
+    #http://stackoverflow.com/questions/17232526/how-to-pass-an-array-argument-to-the-bash-script
+    #http://stackoverflow.com/questions/14366390/bash-if-condition-check-if-element-is-present-in-array
+    local array=("$@"); 
+    time=$1
+    unset array[0]
+    local in=1
+    for element in "${array[@]}"; do
+        if [[ $element == $time ]]; then
+             in=0
+             break
+        fi
+    done
+    return $in
+}
+
+#####Variable Declaration
+
+#http://www.cyberciti.biz/faq/unix-linux-bash-get-time/
+hour=$(date +"%H"| cut -d ":" -f1)
+#wasn't parsing correctly if i didn't include it in the array. could't get 2 variable passing if first was an array. google wasn't helping
+night=($hour 21 22 23 00 01 02 03 04 05)
+morning=($hour 06 07 08 09)
+sunset=($hour 19 20)
+period="Rest"
+
+
+#####Body
+
+if array_day ${night[@]}; then
+    period="Night"
+fi
+
+if array_day ${morning[@]}; then
+    period="Morning"
+fi
+
+if array_day ${sunset[@]}; then
+    period="Sunset"
+fi
+
+wall=$(ls ~/Pictures/Wallpapers/"$period" | shuf -n1)
+gsettings set org.gnome.desktop.background picture-uri ~/Pictures/Wallpapers/"$period"/"$wall"
